@@ -134,6 +134,10 @@ defmodule Harnais.Runner do
 
   See [The Test Mappper](#module-the-test-mapper) below.
 
+  ### `:test_transform`
+
+  See [The Test Transform](#module-the-test-transform) below.
+
   ### `:test_namer`
 
   When the `:test_call` is a function name (i.e. `Atom`), the namer function is called with the function name and should return the actual function to call in the `:test_module`.
@@ -218,7 +222,7 @@ defmodule Harnais.Runner do
 
   ## The Test Mapper
 
-  Each test in the `:test_specs` can be mapped using a `:test_mapper` values that must be one or more functions.
+  Each test in the `:test_specs` can be mapped using a `:test_mapper` value that must be zero, one or more functions.
 
   Each function must have arity one or two.
 
@@ -228,11 +232,17 @@ defmodule Harnais.Runner do
 
   Each mapper is applied to the `test spec` in an `Enum.reduce/3` pipeline.
 
-  > The last mapper must return one of the valid forms of a `test spec` (see multi function example below).
+  > The last mapper must return one of the valid forms of a `test spec` (see the multi mapper example below).
+
+  > Any mapper may return `nil` and cause the test to be discarded; the mapping pipeline is short circuited.
+
+  After the mapper(s) have been applied,
+  `Harnais.Runner.Normalise.test_spec_normalise/3` is called to e.g
+  ensure `Map` form, keys are canonical, etc.
 
   This example is not specific to
   `Harnais.run_tests_default_test_value/1` but is intended to show how
-  a mapper   can be used to build the `Keyword` form of the `test
+  a mapper can be used to build the `Keyword` form of the `test
   spec`.
 
   In this simple example, the mapper finds the expected `test result`
@@ -256,7 +266,7 @@ defmodule Harnais.Runner do
       ...> ])
       :ok
 
-   This example is a variation of the above one but showing three mappers and different arities.
+   This example is a variation of the above one but showing three mappers and different arities. Note the second mapper returns `nil` when `:values` is passed to it causing the test to be discarded.
 
       iex> test_namer = fn name -> "#{name}" |> String.to_atom end
       ...> test_value = %{a: 1, b: 2, c: 3}
@@ -266,8 +276,9 @@ defmodule Harnais.Runner do
       ...> m: [
       ...> test_namer,
       ...> fn
+      ...>   :values -> nil
       ...>   :get -> {:get, [:a]}
-      ...>   :put -> {:get, [:d, 4]}
+      ...>   :put -> {:put, [:d, 4]}
       ...>   test_call -> {test_call, []}
       ...> end,
       ...> fn {test_call, test_args}, run_spec ->
@@ -275,6 +286,48 @@ defmodule Harnais.Runner do
       ...>   test_result = apply(Map, test_call, [test_value | test_args])
       ...>   [c: test_call, a: test_args, r: test_result]
       ...> end],
+      ...> t: ["get", :put, "keys", :values])
+      :ok
+
+  ## The Test Transform
+
+  The `test_transform` works similarly to the `test_mapper` but *must* define the *complete* `test_spec` transform pipeline.
+
+  The `test_transform` pipeline **must** return a `Map` form `test_spec` where all the keys are the canonical ones (i.e. `:test_value` not `:v`)
+
+  The utility function `Harnais.Runner.Normalise.test_spec_normalise/2` can be used / called in the pipeline to perform the basic normalisation.
+
+  > The `test_transform` does NOT use the `test_mapper`.
+
+  This example is a variation of the above one for the mapper but showing the use of the `:test_transform`.  (BTW `:test_transform` has an alias `:p` - for `pipeline`.) Note the second mapper returns `nil` when `:values` is passed to it causing the test to be discarded.
+
+      iex> test_namer = fn name -> "#{name}" |> String.to_atom end
+      ...> test_value = %{a: 1, b: 2, c: 3}
+      ...> Harnais.run_tests_default_test_value(
+      ...> d: Map,
+      ...> v: test_value,
+      ...> # test_transform (alias p)
+      ...> p: [
+      ...> # transform 1: test_namer
+      ...> test_namer,
+      ...> # transform 2: initial expansion
+      ...> fn
+      ...>   :values -> nil
+      ...>   :get -> [c: :get, a: [:a]]
+      ...>   :put -> [c: :put, a: [:d, 4]]
+      ...>   test_call -> [c: test_call, a: []]
+      ...> end,
+      ...> # transform 3: basic normalisation create a map with canonical keys
+      ...> &Harnais.Runner.Normalise.test_spec_normalise/2,
+      ...> fn %{test_call: test_call, test_args: test_args} = test_spec, run_spec ->
+      ...>   test_value = run_spec |> Map.fetch!(:test_value)
+      ...>   test_result = apply(Map, test_call, [test_value | test_args])
+      ...>   # note: put with canonical key names or call test_spec_normalise/3 again
+      ...>   test_spec |> Map.put(:test_result, test_result)
+      ...> end,
+      ...> # transform 4: renormalise to ensure canon keys
+      ...> &Harnais.Runner.Normalise.test_spec_normalise/2
+      ...> ],
       ...> t: ["get", :put, "keys", :values])
       :ok
 
@@ -299,6 +352,7 @@ defmodule Harnais.Runner do
     * `:test_module` -- `:d`, `:module`
     * `:test_namer`  -- `:n`, `:namer`
     * `:test_mapper` -- `:m`, `:mapper`
+    * `:test_transform` -- `:p`, `:transform`
 
   """
 
@@ -317,7 +371,8 @@ defmodule Harnais.Runner do
 
   @type test_module :: atom
   @type test_function :: atom
-  @type test_mapper :: (any -> any) | (any, map -> any)
+  @type test_mapper :: (any -> any) | (any, map -> any) | (any, map, any -> any) | nil
+  @type test_transform :: (any -> any) | (any, map -> any) | (any, map, any -> any) | nil
   @type test_namer :: fun
   @type test_value :: any
   @type test_args :: nil | [any]
@@ -357,12 +412,21 @@ defmodule Harnais.Runner do
   @type runner_option ::
   {:test_module, atom} |
   {:test_mapper, test_mapper} |
+  {:test_transform, test_transform} |
   {:test_namer, test_namer} |
   {:test_value, test_value} |
   {:test_specs, test_specs}
 
   @typedoc "The options passed to Harnais.Runner test runners."
   @type runner_options :: [runner_option]
+
+  defdelegate run_test_canon_keys(spec), to: Harnais.Runner.Normalise, as: :test_spec_normalise_canon_keys
+  defdelegate run_test_canon_keys!(spec), to: Harnais.Runner.Normalise, as: :test_spec_normalise_canon_keys!
+  defdelegate run_test_maybe_canon_keys(spec), to: Harnais.Runner.Normalise, as: :test_spec_maybe_normalise_canon_keys
+
+  defdelegate run_spec_canon_keys(spec), to: Harnais.Runner.Normalise, as: :spec_normalise_canon_keys
+  defdelegate run_spec_canon_keys!(spec), to: Harnais.Runner.Normalise, as: :spec_normalise_canon_keys!
+  defdelegate run_spec_maybe_canon_keys(spec), to: Harnais.Runner.Normalise, as: :spec_maybe_normalise_canon_keys
 
   @doc false
   def run_tests_same_test_runner(test_spec, test_value) do

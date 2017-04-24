@@ -10,6 +10,7 @@ defmodule Harnais.Accessors do
 
     test_flag: nil,
     test_mapper: nil,
+    test_transform: nil,
     test_runner: nil,
     test_module: nil,
     test_namer: nil,

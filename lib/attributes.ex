@@ -11,6 +11,7 @@ defmodule Harnais.Attributes do
       @harnais_opts_key_test_flag :test_flag
       @harnais_opts_key_test_call :test_call
       @harnais_opts_key_test_mapper :test_mapper
+      @harnais_opts_key_test_transform :test_transform
       @harnais_opts_key_test_runner :test_runner
       @harnais_opts_key_test_module :test_module
       @harnais_opts_key_test_namer :test_namer
@@ -20,21 +21,49 @@ defmodule Harnais.Attributes do
       @harnais_opts_key_test_specs :test_specs
       @harnais_opts_key_test_mfas :test_mfas
 
-      @harnais_test_spec_key_aliases %{
+      # ORDER CAN BE IMPORTANT!
+      @harnais_spec_kvs_aliases [
+
+        {@harnais_opts_key_test_runner, [:runner]},
+
+        {@harnais_opts_key_test_namer, [:n, :namer]},
+        {@harnais_opts_key_test_value, [:v, :value]},
+
+        {@harnais_opts_key_test_module, [:d, :module]},
+
+        {@harnais_opts_key_test_mapper, [:m, :mapper]},
+        {@harnais_opts_key_test_transform, [:p, :transform]},
+
+        {@harnais_opts_key_test_specs, [:t, :tests, :specs, :test_specifications, :specifications]},
+
+      ]
+
+      @harnais_spec_map_aliases @harnais_spec_kvs_aliases
+      |> Enum.flat_map(fn
+        {canon, nil} -> [{canon, canon}]
+
+        {canon, aliases} ->
+
+          aliases
+          |> List.wrap |> List.flatten([canon])
+          |> Enum.map(fn alias_value -> {alias_value, canon} end)
+
+      end)
+      |> Enum.into(%{})
+
+      @harnais_spec_keys_all @harnais_spec_kvs_aliases |> Keyword.keys
+
+      @harnais_test_spec_kvs_aliases %{
         @harnais_opts_key_test_flag => [:f, :flag],
         @harnais_opts_key_test_call => [:c, :call],
-        @harnais_opts_key_test_mapper => [:m, :mapper],
-        @harnais_opts_key_test_runner => [:runner],
         @harnais_opts_key_test_module => [:d, :module],
-        @harnais_opts_key_test_namer => [:n, :namer],
         @harnais_opts_key_test_value => [:v, :value],
         @harnais_opts_key_test_args => [:a, :args],
         @harnais_opts_key_test_result => [:r, :result],
-        @harnais_opts_key_test_specs => [:t, :tests, :specs, :test_specifications, :specifications],
         @harnais_opts_key_test_mfas => nil
       }
 
-      @harnais_test_spec_key_alias_to_canon @harnais_test_spec_key_aliases
+      @harnais_test_spec_map_aliases @harnais_test_spec_kvs_aliases
       |> Enum.flat_map(fn
         {canon, nil} -> [{canon, canon}]
 
@@ -64,33 +93,6 @@ defmodule Harnais.Attributes do
       @harnais_opts_key_compare_mfas :compare_mfas
 
       @harnais_opts_key_test_spec_normalise :test_spec_normalise
-
-      # ORDER IS IMPORTANT
-      @harnais_opts_keys_all [
-
-        @harnais_opts_key_test_flag,
-
-        @harnais_opts_key_test_runner,
-        @harnais_opts_key_test_module,
-        @harnais_opts_key_test_namer,
-        @harnais_opts_key_test_value,
-        @harnais_opts_key_test_args,
-        @harnais_opts_key_test_result,
-        @harnais_opts_key_test_mfas,
-
-        @harnais_opts_key_run_test,
-        @harnais_opts_key_compare_module,
-        @harnais_opts_key_compare_mfas,
-
-        @harnais_opts_key_test_spec_normalise,
-
-        # must be at end in this order
-        @harnais_opts_key_test_mapper,
-
-        # must be last
-        @harnais_opts_key_test_specs,
-
-      ]
 
       @harnais_list_alphabet_a_z ?a .. ?z
       |> Enum.map(fn x -> << x :: utf8 >> end) |> Enum.map(&String.to_atom/1)

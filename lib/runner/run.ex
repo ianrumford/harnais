@@ -7,7 +7,7 @@ defmodule Harnais.Runner.Run do
   use Harnais.Attributes
   import Harnais.Accessors
 
-  defp run_test_mfas(test_value, test_mfas) do
+  def run_test_mfas(test_value, test_mfas) do
 
     # Note: mfa must be "complete" i.e. have all args
 

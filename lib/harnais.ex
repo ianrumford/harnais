@@ -11,6 +11,14 @@ defmodule Harnais do
   defdelegate run_tests_same_test_value(opts), to: Harnais.Runner
   defdelegate run_tests_reduce_test_value(opts), to: Harnais.Runner
 
+  defdelegate run_test_canon_keys(spec), to: Harnais.Runner.Normalise, as: :test_spec_normalise_canon_keys
+  defdelegate run_test_canon_keys!(spec), to: Harnais.Runner.Normalise, as: :test_spec_normalise_canon_keys!
+  defdelegate run_test_maybe_canon_keys(spec), to: Harnais.Runner.Normalise, as: :test_spec_maybe_normalise_canon_keys
+
+  defdelegate run_spec_canon_keys(spec), to: Harnais.Runner.Normalise, as: :spec_normalise_canon_keys
+  defdelegate run_spec_canon_keys!(spec), to: Harnais.Runner.Normalise, as: :spec_normalise_canon_keys!
+  defdelegate run_spec_maybe_canon_keys(spec), to: Harnais.Runner.Normalise, as: :spec_maybe_normalise_canon_keys
+
   @doc ~S"""
   The __using__ macro initialises the `Harnais` harness.
 

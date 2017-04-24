@@ -1,7 +1,7 @@
 defmodule Harnais.Mixfile do
   use Mix.Project
 
-  @version "0.1.0"
+  @version "0.2.0"
 
   def project do
     [app: :harnais,
@@ -23,7 +23,7 @@ defmodule Harnais.Mixfile do
 
   defp deps do
     [
-      {:ex_doc, "~> 0.14.5", only: :dev},
+      {:ex_doc, "~> 0.15", only: :dev},
     ]
   end
 
