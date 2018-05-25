@@ -1,6 +1,34 @@
 # CHANGELOG
 
-## v0.1.0 - 1st Release
+## v1.0.0
+
+### 1. Overview
+
+The package is much smaller now and just provides support for the
+other packages in the `Harnais` family.
+
+### 2. Standard Function API Style
+
+The package family has adopted a standard API style that returns either `{:ok, any}` or `{:error, error}` where `error` is an `Exception`.  
+
+Peer bang functions raise the `error` or return the `value`.
+
+### 2. Breaking Internal Changes
+
+These changes do not affect the public APIs.
+
+#### Renamed Harnais.Attributes as Harnais.Attribute
+
+Consistent use of singular module names.
+
+#### Deleted Harnais.Runner Modules, etc
+
+`Harnais.Runner` related modules, attributes, etc have been deleted
+from this package and are migrating into its own package.
+
+#### Deleted Other Modules
+
+Other utility modules have been deleted.
 
 ## v0.2.0
 
@@ -31,25 +59,27 @@ These are now separated so that a test specification key (e.g. *:c*) may not
 appear in the runner specification.  Note some keys appear in both
 (e.g. *:test\_value*)
 
-#### Added to Harnais and Harnais.Runner
+#### Added
 
-1.  run\_test\_canon\_keys/1
-2.  run\_test\_canon\_keys!/1
-3.  run\_test\_maybe\_canon\_keys/1
-4.  run\_spec\_canon\_keys/1
-5.  run\_spec\_canon\_keys!/1
-6.  run\_spec\_maybe\_canon\_keys/1
+1.  Harnais.runner\_test\_normalise\_canon\_keys/1
+2.  Harnais.runner\_test\_normalise\_canon\_keys!/1
+3.  Harnais.runner\_test\_maybe\_normalise\_canon\_keys/1
+4.  Harnais.runner\_spec\_normalise\_canon\_keys/1
+5.  Harnais.runner\_spec\_normalise\_canon\_keys!/1
+6.  Harnais.runner\_spec\_maybe\_normalise\_canon\_keys/1
 
 These functions can be used in e.g. a *test\_mapper* or helper
-function to normalise the keys in the *run specification*  or a
-*test specification*.
+function to normalise the keys in the *runner specification*  or a
+*test\_specification*.
 
-#### Standard test suites in Harnais.Runner.Tests
+#### Begun adding standard test suites in \`Harnais.Runner.Tests\`
 
-The suites are intended to be used as the basis for further
-customisation (using mappers). So far only a suite for
-**Map** is available.
+The suites can be used to test e.g. delegations. So far suites for
+**Map** and **Stream** / **Enum**.
 
-Each test in a suite is \`Map\` form where the keys are the
-**shortest** alias (e.g. *:v* not *:test\_value*).  Test transforms
-/ mappers can be applied in the usual way.
+Each test is a suite is \`Map\` form where the keys are the
+**shortest** alias (e.g. *:v* not *:test\_value*).  Test mappers can
+be applied in the usual way.
+
+## v0.1.0 - 1st Release
+

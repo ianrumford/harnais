@@ -1,2 +1,9 @@
-%{"earmark": {:hex, :earmark, "1.2.0", "bf1ce17aea43ab62f6943b97bd6e3dc032ce45d4f787504e3adf738e54b42f3a", [:mix], []},
-  "ex_doc": {:hex, :ex_doc, "0.15.0", "e73333785eef3488cf9144a6e847d3d647e67d02bd6fdac500687854dd5c599f", [:mix], [{:earmark, "~> 1.1", [hex: :earmark, optional: false]}]}}
+%{
+  "earmark": {:hex, :earmark, "1.2.4", "99b637c62a4d65a20a9fb674b8cffb8baa771c04605a80c911c4418c69b75439", [:mix], []},
+  "ex_doc": {:hex, :ex_doc, "0.18.3", "f4b0e4a2ec6f333dccf761838a4b253d75e11f714b85ae271c9ae361367897b7", [:mix], [{:earmark, "~> 1.1", [hex: :earmark, optional: false]}]},
+  "plymio_ast": {:hex, :plymio_ast, "1.0.0", "33ed380f46a196511adb13f0433843c5222219cc6c11b7a42bdbd91837b11434", [:mix], []},
+  "plymio_codi": {:hex, :plymio_codi, "0.1.0", "93a681e1548fd471969cfc44798fdb3c446303e60a41b89a11eefc5345aafcef", [:mix], [{:plymio_funcio, "~> 0.1.0", [hex: :plymio_funcio, optional: false]}]},
+  "plymio_fontais": {:hex, :plymio_fontais, "0.1.1", "27e9ab18fb513eab85f3771476de6dbd8d26880546c01c9f0ea70f06f35f035b", [:mix], []},
+  "plymio_funcio": {:hex, :plymio_funcio, "0.1.0", "88611d780b48191e39be4228b15166c85ab75817ad3b3a18a162984830c28676", [:mix], [{:plymio_fontais, "~> 0.1.1", [hex: :plymio_fontais, optional: false]}]},
+  "plymio_option": {:hex, :plymio_option, "0.3.0", "59e0637dd03ab3db3322b4c913e27e6d9e5e3ed6bc782fc5f56de486471adb5e", [:mix], []},
+}
